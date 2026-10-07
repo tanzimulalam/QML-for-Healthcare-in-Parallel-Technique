@@ -1,0 +1,14 @@
+# versions I used (Python 3.12, Windows 11); newer ones should also work
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.9.1
+matplotlib==3.11.2
+numba==0.67.0
+threadpoolctl==3.7.0
+wfdb==4.3.1
+
+# only for check_qsim.py (comparison with Qiskit)
+qiskit==2.5.2
+
+# only for the GPU parts; [ctk] brings the CUDA libraries as pip packages, so only the NVIDIA driver is needed
+cupy-cuda12x[ctk]==14.2.0

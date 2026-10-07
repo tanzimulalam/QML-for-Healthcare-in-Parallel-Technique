@@ -1,0 +1,21 @@
+# dataset and everything made from it (get it with scripts/get_data.py)
+data/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OpenMP build output
+openmp/qkernel_omp
+openmp/qkernel_omp.exe
+*.o
+*.bin
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
