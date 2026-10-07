@@ -1,0 +1,5 @@
+[1] simulator vs dense matrices, n=2..8: max error 2.2e-16
+[2] kernel vs Qiskit ZZFeatureMap (8 qubits, 20 samples): max error 1.6e-15
+[3a] A (circuit per pair) vs B (states + GEMM): max error 6.2e-17
+[3b] G on GPU vs B: complex128 max error 1.1e-14 | complex64 max error 1.9e-06
+ALL CHECKS PASSED

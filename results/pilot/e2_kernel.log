@@ -1,0 +1,56 @@
+threading layer: omp | max threads: 24
+calibration: 4.66 us per pair -> N = 2900
+T1 (compiled serial) = 19.69 s for 4,203,550 pairs = 4.68 us/pair
+p= 1 block    19.219s  S= 1.02  E=1.02
+p= 1 cyclic   19.504s  S= 1.01  E=1.01
+p= 1 folded   19.529s  S= 1.01  E=1.01
+p= 1 dynamic  19.585s  S= 1.01  E=1.01
+p= 2 block    14.300s  S= 1.38  E=0.69
+p= 2 cyclic    9.700s  S= 2.03  E=1.01
+p= 2 folded    9.693s  S= 2.03  E=1.02
+p= 2 dynamic   9.751s  S= 2.02  E=1.01
+p= 4 block     8.473s  S= 2.32  E=0.58
+p= 4 cyclic    4.997s  S= 3.94  E=0.98
+p= 4 folded    5.147s  S= 3.82  E=0.96
+p= 4 dynamic   5.043s  S= 3.90  E=0.98
+p= 6 block     6.080s  S= 3.24  E=0.54
+p= 6 cyclic    3.411s  S= 5.77  E=0.96
+p= 6 folded    3.424s  S= 5.75  E=0.96
+p= 6 dynamic   3.458s  S= 5.69  E=0.95
+p= 8 block     4.760s  S= 4.14  E=0.52
+p= 8 cyclic    2.632s  S= 7.48  E=0.93
+p= 8 folded    2.676s  S= 7.36  E=0.92
+p= 8 dynamic   2.663s  S= 7.39  E=0.92
+p= 9 block     4.393s  S= 4.48  E=0.50
+p= 9 cyclic    2.494s  S= 7.89  E=0.88
+p= 9 folded    2.493s  S= 7.90  E=0.88
+p= 9 dynamic   2.475s  S= 7.95  E=0.88
+p=12 block     3.387s  S= 5.81  E=0.48
+p=12 cyclic    2.238s  S= 8.80  E=0.73
+p=12 folded    2.309s  S= 8.53  E=0.71
+p=12 dynamic   2.245s  S= 8.77  E=0.73
+p=16 block     2.772s  S= 7.10  E=0.44
+p=16 cyclic    1.897s  S=10.38  E=0.65
+p=16 folded    1.890s  S=10.41  E=0.65
+p=16 dynamic   1.845s  S=10.67  E=0.67
+p=20 block     2.421s  S= 8.13  E=0.41
+p=20 cyclic    1.602s  S=12.29  E=0.61
+p=20 folded    1.611s  S=12.22  E=0.61
+p=20 dynamic   1.560s  S=12.62  E=0.63
+p=24 block     2.171s  S= 9.07  E=0.38
+p=24 cyclic    1.445s  S=13.62  E=0.57
+p=24 folded    1.450s  S=13.58  E=0.57
+p=24 dynamic   1.397s  S=14.10  E=0.59
+host->device copy of D (11.9 MB): 0.0023 s (not included)
+N=  2900  A: circuit per pair, 1 core             19.6856 s  measured
+N=  2900  A: circuit per pair, 24 threads          1.3966 s  measured
+N=  2900  B: states once + GEMM, 1 core            0.3226 s  measured
+N=  2900  B: states once + GEMM, 24 cores          0.0882 s  measured
+N=  2900  G: GPU, complex128                       0.0308 s  measured
+N=  2900  G: GPU, complex64                        0.0018 s  measured
+N= 16000  A: circuit per pair, 1 core            599.3991 s  extrapolated
+N= 16000  A: circuit per pair, 24 threads         42.5234 s  extrapolated
+N= 16000  B: states once + GEMM, 1 core            9.4251 s  measured
+N= 16000  B: states once + GEMM, 24 cores          1.9591 s  measured
+N= 16000  G: GPU, complex128                       0.9206 s  measured
+N= 16000  G: GPU, complex64                        0.0531 s  measured

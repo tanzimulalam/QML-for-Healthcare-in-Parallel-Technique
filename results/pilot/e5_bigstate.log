@@ -1,0 +1,21 @@
+n=26: state 1.00 GiB, 55.8 GB moved per layer
+p= 1  1.740 s/layer  S= 1.00    32.1 GB/s  (plain copy 28.2 GB/s)
+p= 2  1.246 s/layer  S= 1.40    44.8 GB/s  (plain copy 38.5 GB/s)
+p= 4  0.901 s/layer  S= 1.93    62.0 GB/s  (plain copy 51.9 GB/s)
+p= 6  0.850 s/layer  S= 2.05    65.7 GB/s  (plain copy 59.2 GB/s)
+p= 8  0.820 s/layer  S= 2.12    68.1 GB/s  (plain copy 64.7 GB/s)
+p=12  0.705 s/layer  S= 2.47    79.2 GB/s  (plain copy 60.4 GB/s)
+p=16  0.685 s/layer  S= 2.54    81.5 GB/s  (plain copy 61.2 GB/s)
+p=20  0.649 s/layer  S= 2.68    86.0 GB/s  (plain copy 58.0 GB/s)
+p=24  0.670 s/layer  S= 2.60    83.3 GB/s  (plain copy 58.1 GB/s)
+norm after all runs (must be 1): 1.000000000000
+{'qubits': 12, 'GiB_c128': '0.0001', 'cpu_1': '0.0000', 'cpu_24': '0.0005', 'gpu_c128': '0.0001', 'gpu_c64': '0.0002'}
+{'qubits': 14, 'GiB_c128': '0.0002', 'cpu_1': '0.0001', 'cpu_24': '0.0002', 'gpu_c128': '0.0002', 'gpu_c64': '0.0001'}
+{'qubits': 16, 'GiB_c128': '0.0010', 'cpu_1': '0.0006', 'cpu_24': '0.0002', 'gpu_c128': '0.0003', 'gpu_c64': '0.0002'}
+{'qubits': 18, 'GiB_c128': '0.0039', 'cpu_1': '0.0029', 'cpu_24': '0.0005', 'gpu_c128': '0.0002', 'gpu_c64': '0.0002'}
+{'qubits': 20, 'GiB_c128': '0.0156', 'cpu_1': '0.0130', 'cpu_24': '0.0015', 'gpu_c128': '0.0004', 'gpu_c64': '0.0003'}
+{'qubits': 22, 'GiB_c128': '0.0625', 'cpu_1': '0.0969', 'cpu_24': '0.0089', 'gpu_c128': '0.0046', 'gpu_c64': '0.0006'}
+{'qubits': 24, 'GiB_c128': '0.2500', 'cpu_1': '0.3948', 'cpu_24': '0.1349', 'gpu_c128': '0.0207', 'gpu_c64': '0.0104'}
+{'qubits': 26, 'GiB_c128': '1.0000', 'cpu_1': '1.6527', 'cpu_24': '0.6672', 'gpu_c128': '0.0918', 'gpu_c64': '0.0449'}
+{'qubits': 28, 'GiB_c128': '4.0000', 'cpu_1': '7.2804', 'cpu_24': '2.8371', 'gpu_c128': '0.3843', 'gpu_c64': '0.1748'}
+{'qubits': 30, 'GiB_c128': '16.0000', 'cpu_1': '', 'cpu_24': '12.1651', 'gpu_c128': 'OOM', 'gpu_c64': '0.7389'}
