@@ -22,9 +22,9 @@ fi
 
 echo "N,threads,schedule,chunk,seconds,busy_min,busy_max,checksum" > "$OUT/schedules.csv"
 for p in $THREADS; do
-    for s in static cyclic folded dynamic guided; do
+    for s in static cyclic folded dynamic guided taskloop; do
         chunk=0
-        [ "$s" = dynamic ] && chunk=4
+        [ "$s" = dynamic ] || [ "$s" = taskloop ] && chunk=4
         ./qkernel_omp -n "$N" -t "$p" -s "$s" -c "$chunk" $INPUT -r 3 >> "$OUT/schedules.csv" || exit 1
     done
 done

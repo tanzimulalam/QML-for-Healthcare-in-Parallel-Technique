@@ -5,10 +5,20 @@ CC = gcc
 CFLAGS = -O3 -march=native -fopenmp -fcx-limited-range -std=gnu11 -Wall -Wextra
 LDLIBS = -lm
 
-qkernel_omp: qkernel_omp.c
-	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
+PROGS = qkernel_omp gram_omp bigstate_omp
+
+all: $(PROGS)
+
+qkernel_omp: qkernel_omp.c qcommon.c qcommon.h
+	$(CC) $(CFLAGS) -o $@ qkernel_omp.c qcommon.c $(LDLIBS)
+
+gram_omp: gram_omp.c qcommon.c qcommon.h
+	$(CC) $(CFLAGS) -o $@ gram_omp.c qcommon.c $(LDLIBS)
+
+bigstate_omp: bigstate_omp.c qcommon.c qcommon.h
+	$(CC) $(CFLAGS) -o $@ bigstate_omp.c qcommon.c $(LDLIBS)
 
 clean:
-	rm -f qkernel_omp qkernel_omp.exe
+	rm -f $(PROGS) $(addsuffix .exe,$(PROGS))
 
-.PHONY: clean
+.PHONY: all clean
