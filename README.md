@@ -70,6 +70,7 @@ pip install -r requirements.txt
 - **MPI:** `pip install mpi4py` on a machine that has MPI (on the cluster, load its MPI module first). On Windows, `pip install mpi4py impi-rt` installs Intel MPI into the venv; set `I_MPI_ROOT` to the venv's `Library` folder and use the `mpiexec.exe` in `Library\bin`. Windows Firewall may ask whether `hydra_pmi_proxy` can accept connections. Clicking Cancel is fine, because everything runs on one machine.
 - **GPU (optional):** an NVIDIA GPU and driver. `cupy-cuda12x[ctk]` brings the CUDA libraries along, and the CUDA kernels are compiled at run time, so no CUDA toolkit install is needed. Without a GPU, the GPU parts are skipped.
 - **Qiskit** is only used by `check_qsim.py`, to compare my simulator with it.
+- **Long folder paths on Windows:** Numba keeps compiled code in `src/__pycache__`. If the folder is buried very deep, those file names can go past Windows' 260-character path limit and Numba fails with a `FileNotFoundError` on an `.nbc` file. Move the folder closer to `C:\`, or set `NUMBA_CACHE_DIR` to a short folder.
 
 ## Quick test
 
