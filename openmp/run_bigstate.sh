@@ -9,7 +9,7 @@
 
 Q=${Q:-26}
 THREADS=${THREADS:-"1 2 4 6 8 12 16 20 24"}
-OUT=../results/openmp
+OUT=../${QML_RESULTS:-results}/openmp
 mkdir -p "$OUT"
 
 CSV="$OUT/bigstate.csv"

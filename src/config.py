@@ -1,10 +1,13 @@
 """Paths and dataset constants used by all the scripts."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 MITDB = DATA / "mit-bih-arrhythmia-database-1.0.0"
-RESULTS = ROOT / "results"
+# QML_RESULTS (relative to the repository) lets scripts/quick_test.sh write
+# somewhere else, so a test run never overwrites the real results
+RESULTS = ROOT / os.environ.get("QML_RESULTS", "results")
 
 FS = 360        # MIT-BIH sampling rate in Hz
 HALF_WIN = 90   # samples each side of the R peak, so every beat is a 0.5 s window

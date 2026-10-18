@@ -11,7 +11,7 @@ N=${N:-8000}
 THREADS=${THREADS:-"1 2 4 8 12 16 24"}
 TILES=${TILES:-"16 32 64 128 256"}
 FEAT=${FEAT:-../data/u_train.bin}
-OUT=../results/openmp
+OUT=../${QML_RESULTS:-results}/openmp
 mkdir -p "$OUT"
 
 INPUT=""

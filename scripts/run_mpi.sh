@@ -17,7 +17,7 @@ PYTHON=${PYTHON:-python}
 MPIRUN=${MPIRUN:-mpirun}
 EXTRA=${EXTRA:-}            # e.g. EXTRA=--real for the real ECG features
 
-rm -f results/mpi/runs.csv
+rm -f "${QML_RESULTS:-results}/mpi/runs.csv"
 "$PYTHON" src/kernel_mpi.py --n "$N" --mode serial $EXTRA || exit 1
 for p in $RANKS; do
     for m in block cyclic dynamic; do

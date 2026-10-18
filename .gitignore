@@ -19,3 +19,6 @@ openmp/qkernel_omp.exe
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# output of scripts/quick_test.sh
+results/quick_test/

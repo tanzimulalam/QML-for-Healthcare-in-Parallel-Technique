@@ -10,7 +10,7 @@
 N=${N:-2000}
 THREADS=${THREADS:-"1 2 4 6 8 12 16 20 24"}
 FEAT=${FEAT:-../data/u_train.bin}
-OUT=../results/openmp
+OUT=../${QML_RESULTS:-results}/openmp
 mkdir -p "$OUT"
 
 if [ -f "$FEAT" ]; then
