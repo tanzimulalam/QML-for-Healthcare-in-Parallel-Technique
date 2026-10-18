@@ -9,7 +9,9 @@ venv/
 
 # OpenMP build output
 openmp/qkernel_omp
-openmp/qkernel_omp.exe
+openmp/gram_omp
+openmp/bigstate_omp
+openmp/*.exe
 *.o
 *.bin
 
