@@ -30,8 +30,29 @@ def zz_phases(x):
     return np.exp(1j * ph)
 
 
+@njit(parallel=True, cache=True)
+def _phase_rows(X, out):
+    # same formula as zz_phases, one sample per iteration, samples in parallel
+    nq = X.shape[1]
+    for r in prange(X.shape[0]):
+        for s in range(out.shape[1]):
+            ph = 0.0
+            for i in range(nq):
+                zi = (s >> i) & 1
+                ph += 2.0 * X[r, i] * zi
+                for j in range(i + 1, nq):
+                    if zi != ((s >> j) & 1):
+                        ph += 2.0 * (np.pi - X[r, i]) * (np.pi - X[r, j])
+            out[r, s] = np.cos(ph) + 1j * np.sin(ph)
+
+
 def phase_table(X):
-    return np.array([zz_phases(x) for x in X])
+    # A Python loop over zz_phases was fine for a few thousand beats, but for the
+    # 49,691 test beats it took ~5 s, more than everything else in the QSVM.
+    X = np.ascontiguousarray(X, dtype=np.float64)
+    out = np.empty((X.shape[0], 2 ** X.shape[1]), np.complex128)
+    _phase_rows(X, out)
+    return out
 
 
 def encode(U, lam=0.1):
