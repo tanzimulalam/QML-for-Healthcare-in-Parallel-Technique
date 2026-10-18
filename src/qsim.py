@@ -121,6 +121,17 @@ def _rows(D, K, start, stop):
         _row(i, D, K, psi)
 
 
+@njit(nogil=True, cache=True)
+def kernel_rows(D, rows, out):
+    # out[k, j] = K[rows[k], j] for j > rows[k]; the rest of out is left alone.
+    # Used by the MPI version, where a worker only holds the rows it computed.
+    psi = np.empty(D.shape[1], np.complex128)
+    for k in range(rows.shape[0]):
+        i = rows[k]
+        for j in range(i + 1, D.shape[0]):
+            out[k, j] = pair_kernel(D[i], D[j], psi)
+
+
 class WorkQueue:
     """
     Dynamic schedule: chunks of rows go into a queue and a free thread takes the
