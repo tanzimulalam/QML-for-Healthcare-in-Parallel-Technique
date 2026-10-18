@@ -3,7 +3,8 @@ Correctness checks for qsim.py. Run this before trusting any timing.
 
   1. statevectors vs brute-force dense matrices (2..8 qubits)
   2. kernel vs Qiskit's ZZFeatureMap + Statevector (needs qiskit)
-  3. version A == version B (serial and parallel squaring), and the GPU if CuPy works
+  3. version A == version B (serial and parallel squaring) == the cross kernel
+  4. the GPU versions (B in both precisions, and A) if CuPy works
 """
 import sys
 
@@ -62,14 +63,22 @@ def main():
         print(f"version A vs {name}: max error {err:.1e}")
         ok &= err < 1e-12
 
+    # test x train kernel: rows 0..19 against rows 20..59 must be the same entries of KA
+    err = np.abs(qsim.kernel_cross(D[:20], D[20:]) - KA[:20, 20:]).max()
+    print(f"cross kernel (20 x 40) vs version A: max error {err:.1e}")
+    ok &= err < 1e-12
+
     try:
         import cupy as cp
         e128 = np.abs(cp.asnumpy(qsim.kernel_gpu(cp.asarray(D)))[up] - KA[up]).max()
         e64 = np.abs(cp.asnumpy(qsim.kernel_gpu(cp.asarray(D.astype(np.complex64))))[up] - KA[up]).max()
-        print(f"GPU: complex128 error {e128:.1e}, complex64 error {e64:.1e}")
+        print(f"GPU version B: complex128 error {e128:.1e}, complex64 error {e64:.1e}")
         ok &= e128 < 1e-12 and e64 < 1e-5
+        ea = np.abs(cp.asnumpy(qsim.kernel_pairs_gpu(cp.asarray(D)))[up] - KA[up]).max()
+        print(f"GPU version A (block per pair): error {ea:.1e}")
+        ok &= ea < 1e-12
     except Exception as e:  # no CuPy or no GPU
-        print("GPU check skipped:", type(e).__name__)
+        print("GPU check skipped:", type(e).__name__, e)
 
     print("all checks passed" if ok else "SOME CHECKS FAILED")
     sys.exit(0 if ok else 1)

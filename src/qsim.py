@@ -191,18 +191,29 @@ def states(D):
     return flat.reshape(n, dim)
 
 
+def gram(psi_a, psi_b):
+    # K[a, b] = |<psi_a|psi_b>|^2 for every pair of rows, one complex GEMM
+    G = psi_a.conj() @ psi_b.T
+    K = np.empty(G.shape)
+    abs2(G, K)
+    return K
+
+
 def kernel_gemm(D, serial_square=False):
     """Version B. serial_square=True keeps the old single-threaded last step
     (the Amdahl bottleneck from the midterm report) for comparison."""
     psi = states(D)
-    G = psi.conj() @ psi.T
     if serial_square:
-        K = np.abs(G)
+        K = np.abs(psi.conj() @ psi.T)
         K *= K
         return K
-    K = np.empty(G.shape)
-    abs2(G, K)
-    return K
+    return gram(psi, psi)
+
+
+def kernel_cross(DA, DB):
+    """Kernel between two different sets of beats, e.g. test x train for the
+    SVM's predictions. Rectangular, so there is no triangle to balance."""
+    return gram(states(DA), states(DB))
 
 
 # ---- version B on the GPU ---------------------------------------------------
@@ -226,28 +237,72 @@ __device__ void h_pair(complex<T>* psi, long long half, int k) {
 
 extern "C" __global__ void h_gate_c128(complex<double>* psi, long long half, int k) { h_pair<double>(psi, half, k); }
 extern "C" __global__ void h_gate_c64(complex<float>* psi, long long half, int k) { h_pair<float>(psi, half, k); }
+
+// Version A on the GPU, 8 qubits only: one thread block per pair (i, j).
+// The 256 amplitudes sit in shared memory and each of the 128 threads does
+// one butterfly per gate, with a barrier after every gate.
+__device__ void h_layer_shared(complex<double>* psi, int t) {
+    const double s = 0.70710678118654752440;
+    for (int k = 0; k < 8; k++) {
+        int stride = 1 << k;
+        int i0 = ((t >> k) << (k + 1)) | (t & (stride - 1));
+        int i1 = i0 | stride;
+        complex<double> a = psi[i0], b = psi[i1];
+        psi[i0] = (a + b) * s;
+        psi[i1] = (a - b) * s;
+        __syncthreads();
+    }
+}
+
+extern "C" __global__ void pair_circuits(const complex<double>* D, double* K, int n, int row0) {
+    int i = row0 + blockIdx.y, j = blockIdx.x;
+    // half the grid is below the diagonal; those blocks leave straight away,
+    // all threads together, so nobody is left waiting at a barrier
+    if (j <= i || i >= n) return;
+    __shared__ complex<double> psi[256];
+    const complex<double>* di = D + (long long)i * 256;
+    const complex<double>* dj = D + (long long)j * 256;
+    int t = threadIdx.x;
+    psi[t] = complex<double>(t == 0 ? 1.0 : 0.0, 0.0);
+    psi[t + 128] = 0.0;
+    __syncthreads();
+    for (int r = 0; r < 2; r++) {           // U(x_i)
+        h_layer_shared(psi, t);
+        psi[t] *= di[t];
+        psi[t + 128] *= di[t + 128];
+        __syncthreads();
+    }
+    for (int r = 0; r < 2; r++) {           // U(x_j)^+
+        psi[t] *= conj(dj[t]);
+        psi[t + 128] *= conj(dj[t + 128]);
+        __syncthreads();
+        h_layer_shared(psi, t);
+    }
+    if (t == 0)
+        K[(long long)i * n + j] = psi[0].real() * psi[0].real() + psi[0].imag() * psi[0].imag();
+}
 """
 
 _gpu = {}
 
 
-def _gpu_kernel(dtype):
+def _gpu_fn(name):
     import cupy as cp
     if not _gpu:
         mod = cp.RawModule(code=CUDA_SRC, options=("--std=c++17",))
-        _gpu["c128"] = mod.get_function("h_gate_c128")
-        _gpu["c64"] = mod.get_function("h_gate_c64")
-    return _gpu["c64" if dtype == cp.complex64 else "c128"]
+        for f in ("h_gate_c128", "h_gate_c64", "pair_circuits"):
+            _gpu[f] = mod.get_function(f)
+    return _gpu[name]
 
 
 def h_gate_gpu(psi, k, block=256):
-    kern = _gpu_kernel(psi.dtype)
+    import cupy as cp
+    kern = _gpu_fn("h_gate_c64" if psi.dtype == cp.complex64 else "h_gate_c128")
     half = psi.size // 2
     kern(((half + block - 1) // block,), (block,), (psi, np.int64(half), np.int32(k)))
 
 
-def kernel_gpu(D):
-    """Version B on the GPU. D is a CuPy array (complex128 or complex64)."""
+def states_gpu(D):
     import cupy as cp
     n, dim = D.shape
     nq = dim.bit_length() - 1
@@ -258,8 +313,30 @@ def kernel_gpu(D):
         for k in range(nq):
             h_gate_gpu(flat, k)
         flat *= d
-    psi = flat.reshape(n, dim)
-    G = psi.conj() @ psi.T
-    K = cp.abs(G)
+    return flat.reshape(n, dim)
+
+
+def gram_gpu(psi_a, psi_b):
+    import cupy as cp
+    K = cp.abs(psi_a.conj() @ psi_b.T)
     K *= K
+    return K
+
+
+def kernel_gpu(D):
+    """Version B on the GPU. D is a CuPy array (complex128 or complex64)."""
+    psi = states_gpu(D)
+    return gram_gpu(psi, psi)
+
+
+def kernel_pairs_gpu(D):
+    """Version A on the GPU (one circuit per pair). D is a complex128 CuPy array
+    of 8-qubit phase vectors; only the upper triangle of the result is filled."""
+    import cupy as cp
+    n, dim = D.shape
+    assert dim == 256 and D.dtype == cp.complex128, "pair_circuits is written for 8 qubits, complex128"
+    kern = _gpu_fn("pair_circuits")
+    K = cp.zeros((n, n))
+    for row0 in range(0, n, 65535):          # grid y is limited to 65535 blocks
+        kern((n, min(65535, n - row0)), (128,), (D, K, np.int32(n), np.int32(row0)))
     return K

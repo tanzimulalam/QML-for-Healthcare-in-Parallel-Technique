@@ -1,6 +1,7 @@
 """
 Same kernel matrix, different ways of computing it:
-  A  one circuit per pair, 1 core and all cores (dynamic queue)
+  A  one circuit per pair: 1 core, all cores (dynamic queue), and the GPU
+     (one thread block per pair)
   B  every state simulated once, then one complex GEMM, 1 core and all cores
   G  B on the GPU, complex128 and complex64
 at a small N and a big N. At the big N version A would take hours, so its time
@@ -102,6 +103,24 @@ def main():
         import cupy as cp
         e = np.abs(cp.asnumpy(qsim.kernel_gpu(cp.asarray(D)))[up] - K1[up]).max()
         assert e < 1e-12, f"GPU kernel is off by {e}"
+
+        # version A on the GPU: one thread block per pair
+        Dg = cp.asarray(D)
+        e = np.abs(cp.asnumpy(qsim.kernel_pairs_gpu(Dg))[up] - K1[up]).max()
+        assert e < 1e-12, f"GPU pair kernel is off by {e}"
+        ta = gpu_timed(lambda: qsim.kernel_pairs_gpu(Dg), args.reps)
+        a_gpu = [dict(N=n, method="A, GPU", seconds=ta, measured=True)]
+        est = ta * pairs / (n * (n - 1) / 2)
+        if est < 60:
+            Dg = cp.asarray(Db)
+            a_gpu.append(dict(N=big, method="A, GPU", seconds=gpu_timed(lambda: qsim.kernel_pairs_gpu(Dg), 1),
+                              measured=True))
+        else:
+            a_gpu.append(dict(N=big, method="A, GPU", seconds=est, measured=False))
+        rows[4:4] = a_gpu                   # keep the A rows together in the table and the plot
+        del Dg
+        cp.get_default_memory_pool().free_all_blocks()
+
         for size, Dm in ((n, D), (big, Db)):
             for dt in (np.complex128, np.complex64):
                 Dg = cp.asarray(Dm.astype(dt))
